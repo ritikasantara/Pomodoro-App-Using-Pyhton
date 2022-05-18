@@ -6,12 +6,23 @@ RED = "#e7305b"
 GREEN = "#9bdeac"
 YELLOW = "#f7f5dd"
 FONT_NAME = "Courier"
-WORK_MIN = 1
+WORK_MIN = 25
 SHORT_BREAK_MIN = 5
 LONG_BREAK_MIN = 20
 reps = 0
+timer = None
 
 # ---------------------------- TIMER RESET ------------------------------- #
+
+
+def reset_timer():
+    window.after_cancel(timer)
+    label_timer.config(text="Timer", fg=GREEN, bg=YELLOW, font=(FONT_NAME, 50, "bold"))
+    canvas.itemconfig(timer_display, text="00:00")
+    label_tick.config(text="")
+    global reps
+    reps = 0
+
 
 # ---------------------------- TIMER MECHANISM ------------------------------- #
 
@@ -23,25 +34,16 @@ def start_timer():
     work_sec = WORK_MIN * 60
     short_break_sec = SHORT_BREAK_MIN * 60
     long_break_sec = LONG_BREAK_MIN * 60
-    if reps % 2 != 0:
-        count_down(work_sec)
-        label_timer.config(text="Work time", fg=GREEN, bg=YELLOW, font=(FONT_NAME, 50, "bold"))
-    elif reps % 2 == 0 and reps != 8:
-        count_down(short_break_sec)
-        label_timer.config(text="5 minutes break", fg=PINK, bg=YELLOW, font=(FONT_NAME, 45, "bold"))
-    else:
-        count_down(long_break_sec)
-        label_timer.config(text="25 minutes break", fg=RED, bg=YELLOW, font=(FONT_NAME, 45, "bold"))
 
-    # if reps % 8 == 0:
-    #     count_down(long_break_sec)
-    #     label_timer.config(text="25 minutes break", fg=RED, bg=YELLOW, font=(FONT_NAME, 45, "bold"))
-    # elif reps % 2 == 0:
-    #     count_down(short_break_sec)
-    #     label_timer.config(text="5 minutes break", fg=PINK, bg=YELLOW, font=(FONT_NAME, 45, "bold"))
-    # else:
-    #     count_down(work_sec)
-    #     label_timer.config(text="Work time", fg=GREEN, bg=YELLOW, font=(FONT_NAME, 50, "bold"))
+    if reps % 8 == 0:
+        count_down(long_break_sec)
+        label_timer.config(text="Break", fg=RED, bg=YELLOW, font=(FONT_NAME, 45, "bold"))
+    elif reps % 2 == 0:
+        count_down(short_break_sec)
+        label_timer.config(text="Break", fg=PINK, bg=YELLOW, font=(FONT_NAME, 45, "bold"))
+    else:
+        count_down(work_sec)
+        label_timer.config(text="Work", fg=GREEN, bg=YELLOW, font=(FONT_NAME, 50, "bold"))
 
 
 # ---------------------------- COUNTDOWN MECHANISM ------------------------------- #
@@ -56,7 +58,8 @@ def count_down(count):
         count_sec = "0"+str(count_sec)
     canvas.itemconfig(timer_display, text=f"{count_min}:{count_sec}")
     if count > 0:
-        window.after(1000, count_down, count - 1)
+        global timer
+        timer = window.after(1000, count_down, count - 1)
     else:
         start_timer()
         check_mark = ""
@@ -89,11 +92,8 @@ label_tick.grid(column=1, row=3)
 button_start = Button(text="Start", font=(FONT_NAME, 20, "bold"), highlightthickness=0, command=start_timer)
 button_start.grid(column=0, row=2)
 
-button_reset = Button(text="Reset", font=(FONT_NAME, 20, "bold"), highlightthickness=0)
+button_reset = Button(text="Reset", font=(FONT_NAME, 20, "bold"), highlightthickness=0, command = reset_timer)
 button_reset.grid(column=2, row=2)
-
-
-
 
 
 window.mainloop()
